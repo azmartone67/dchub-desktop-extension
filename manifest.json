@@ -1,0 +1,102 @@
+{
+  "manifest_version": "0.2",
+  "name": "dchub",
+  "display_name": "DC Hub",
+  "version": "1.0.1",
+  "description": "Live data-center, power & grid intelligence for AI agents \u2014 query and cite in real time.",
+  "long_description": "DC Hub is the live data-center & energy intelligence layer for AI agents. It bridges to the hosted MCP server at https://dchub.cloud/mcp, giving Claude live, cited ground truth on the physical infrastructure behind AI: 21,000+ data-center facilities across 170+ countries, 300+ power markets (the DCPI power index with BUILD/CAUTION/AVOID verdicts), real-time ISO grid telemetry and interconnection-queue depth, natural gas, fiber routes, water risk, tax incentives, and 2,000+ tracked M&A deals. Every full-data response carries a citation (CC-BY-4.0). Free tier works with no signup; optional OAuth 2.0 sign-in (WorkOS AuthKit) unlocks the full data tier.",
+  "author": {
+    "name": "DC Hub",
+    "email": "jonathan@dchub.cloud",
+    "url": "https://dchub.cloud"
+  },
+  "homepage": "https://dchub.cloud",
+  "documentation": "https://dchub.cloud/llms.txt",
+  "support": "https://dchub.cloud",
+  "icon": "icon.png",
+  "privacy_policies": [
+    "https://dchub.cloud/privacy"
+  ],
+  "keywords": [
+    "data center",
+    "power",
+    "energy",
+    "electricity grid",
+    "ISO",
+    "interconnection",
+    "infrastructure",
+    "fiber",
+    "natural gas",
+    "M&A"
+  ],
+  "license": "MIT",
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/server/index.js"
+      ],
+      "env": {}
+    }
+  },
+  "tools": [
+    {
+      "name": "search_facilities",
+      "description": "Search 21,000+ data-center facilities by market, operator, country, tier, or capacity."
+    },
+    {
+      "name": "get_facility",
+      "description": "Detailed profile for a single facility: operator, capacity, tenants, nearby infrastructure."
+    },
+    {
+      "name": "get_market_intel",
+      "description": "Market analytics and the DCPI power index for a given market."
+    },
+    {
+      "name": "rank_markets",
+      "description": "Rank power markets by capacity, deployability, or DCPI score."
+    },
+    {
+      "name": "get_grid_intelligence",
+      "description": "Per-ISO grid headroom with BUILD/CAUTION/AVOID verdicts."
+    },
+    {
+      "name": "get_interconnection_queue",
+      "description": "Live ISO interconnection-queue depth, data-center load share, and time-to-power."
+    },
+    {
+      "name": "get_fiber_intel",
+      "description": "Dark-fiber routes and carriers near a location."
+    },
+    {
+      "name": "get_gas_intelligence",
+      "description": "Natural-gas pipeline proximity and economics for behind-the-meter siting."
+    },
+    {
+      "name": "list_transactions",
+      "description": "Search 2,000+ tracked data-center M&A transactions."
+    },
+    {
+      "name": "hyperscaler_deals",
+      "description": "Recent hyperscaler capex and data-center deals."
+    },
+    {
+      "name": "analyze_site",
+      "description": "Score a lat/lng location for data-center suitability."
+    },
+    {
+      "name": "compare_sites",
+      "description": "Side-by-side comparison of markets or sites."
+    },
+    {
+      "name": "score_facility",
+      "description": "Multi-factor score for a specific facility."
+    },
+    {
+      "name": "get_news",
+      "description": "Latest data-center industry news from 40+ sources."
+    }
+  ]
+}
