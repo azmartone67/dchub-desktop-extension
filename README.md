@@ -1,3 +1,5 @@
+> **Note:** This is the Claude Desktop (MCPB) packaging of the canonical **DC Hub MCP server** — for the main listing see [glama.ai/mcp/servers/qa3uoznre7](https://glama.ai/mcp/servers/qa3uoznre7) · [github.com/azmartone67/dchub-mcp-server](https://github.com/azmartone67/dchub-mcp-server).
+
 # DC Hub — Claude Desktop Extension
 
 A Claude Desktop extension (MCPB) that connects Claude to **DC Hub** — the live
