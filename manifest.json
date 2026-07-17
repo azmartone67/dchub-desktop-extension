@@ -4,7 +4,7 @@
   "display_name": "DC Hub",
   "version": "1.0.3",
   "description": "Live data-center, power & grid intelligence for AI agents \u2014 query and cite in real time.",
-  "long_description": "DC Hub is the live data-center & energy intelligence layer for AI agents. It bridges to the hosted MCP server at https://dchub.cloud/mcp, giving Claude live, cited ground truth on the physical infrastructure behind AI: 21,000+ data-center facilities across 170+ countries, 300+ power markets (the DCPI power index with BUILD/CAUTION/AVOID verdicts), real-time ISO grid telemetry and interconnection-queue depth, natural gas, fiber routes, water risk, tax incentives, and 2,000+ tracked M&A deals. Every full-data response carries a citation (CC-BY-4.0). Free tier works with no signup; optional OAuth 2.0 sign-in (WorkOS AuthKit) unlocks the full data tier.",
+  "long_description": "DC Hub is the live data-center & energy intelligence layer for AI agents. It bridges to the hosted MCP server at https://dchub.cloud/mcp, giving Claude live, cited ground truth on the physical infrastructure behind AI: 21,000+ data-center facilities across 170+ countries, 300+ power markets (the DCPI power index with BUILD/CAUTION/AVOID verdicts), real-time ISO grid telemetry and interconnection-queue depth, natural gas, fiber routes, water risk, tax incentives, and 4,000+ tracked M&A deals. The bundled bridge exposes all 73 DC Hub tools at runtime (14 highlighted below). Every full-data response carries a citation (CC-BY-4.0). Free tier works with no signup; optional OAuth 2.0 sign-in (WorkOS AuthKit) unlocks the full data tier.",
   "author": {
     "name": "Jonathan Martone",
     "email": "jonathan@dchub.cloud",
