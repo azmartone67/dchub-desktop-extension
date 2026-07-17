@@ -1,0 +1,48 @@
+name: stale-numbers-check
+# The dchub-desktop-extension repo is OUTSIDE the main mcp-server manifest-drift
+# pipeline (registry-refresh.yml / daily-manifest-sync.yml), so its coverage prose
+# drifted silently — the "2,000+ M&A deals" that showed up stale on Glama (fixed
+# 2026-07-16). This guard fails CI on known-stale coverage numbers so it can't recur.
+# It checks PROSE only (README + manifest description/long_description), never the
+# curated 14-tool manifest `tools[]` array (that subset is deliberate).
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail on stale coverage numbers
+        run: |
+          python3 - <<'PY'
+          import json, re, sys
+          try:
+              readme = open("README.md", encoding="utf-8").read()
+          except FileNotFoundError:
+              readme = ""
+          prose = readme
+          try:
+              m = json.load(open("manifest.json", encoding="utf-8"))
+              prose += "\n" + (m.get("description") or "") + "\n" + (m.get("long_description") or "")
+          except Exception as e:
+              print(f"::warning::manifest.json unreadable ({e}) — checking README only")
+          BANS = [
+              (r"\b[123],?000\+?\s*(?:tracked\s*)?(?:M&A\s*)?deals", "stale M&A deal count — canonical floor is 4,000+"),
+              (r"\b2[0-9][0-9]\+?\s*(?:(?:US|power)\s+)*markets", "stale market count — canonical is 300+/311"),
+              (r"\b(?:20,?000|50,?000)\+?\s*(?:data.?center\s*)?facilit", "stale/wrong facility count — canonical is 21,000+"),
+              (r"\b(?:19|38|53|58|60|71|72)\s*tools\b", "stale tool count in prose — server exposes 73"),
+          ]
+          fails = []
+          for pat, why in BANS:
+              for mm in re.finditer(pat, prose, re.I):
+                  fails.append(f"  x '{mm.group(0).strip()}' -> {why}")
+          if fails:
+              print("::error::Stale coverage numbers in README/manifest prose:")
+              print("\n".join(sorted(set(fails))))
+              print("\nCanonical: 21,000+ facilities | 300+ markets | 4,000+ deals | 73 tools.")
+              sys.exit(1)
+          print("OK - no stale coverage numbers")
+          PY
