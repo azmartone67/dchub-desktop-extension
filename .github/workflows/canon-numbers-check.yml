@@ -14,8 +14,16 @@ name: canon-numbers-check
 # of restating it, so this guard cannot drift the way the last one did. Run it
 # locally the same way CI does, including --self-test.
 #
-# It checks PROSE only (README + manifest description/long_description), never
-# the curated 14-tool manifest tools[] array — that subset is deliberate.
+# It checks PROSE — README, manifest description/long_description, AND the
+# description of each entry in manifest tools[]. Only the LENGTH of that array
+# is the deliberate curated subset; a stale count inside a tool description is
+# the string an agent actually reads, and one was hiding there.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
 jobs:
   check:
     runs-on: ubuntu-latest
