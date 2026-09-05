@@ -1,0 +1,39 @@
+name: canon-numbers-check
+# The dchub-desktop-extension repo is OUTSIDE the main mcp-server manifest-drift
+# pipeline (registry-refresh.yml / daily-manifest-sync.yml), and Glama mirrors it
+# as a second front door for Claude Desktop users — so its coverage prose rots in
+# public with nothing pulling it forward.
+#
+# ★ This replaces a ban-list guard that had itself gone stale. It hardcoded
+# "canonical floor is 4,000+ deals / 21,000+ facilities / 73 tools" and printed
+# those in its failure message, while live canon was 2,100+ / 20,500+ / 83 — and
+# the README it guarded said 21,000+ and 4,000+, green, because a ban-list only
+# catches the wrong numbers someone thought of on the day they wrote it.
+#
+# scripts/check-canon-numbers.py reads canon from /api/v1/canon/phrases instead
+# of restating it, so this guard cannot drift the way the last one did. Run it
+# locally the same way CI does, including --self-test.
+#
+# It checks PROSE — README, manifest description/long_description, AND the
+# description of each entry in manifest tools[]. Only the LENGTH of that array
+# is the deliberate curated subset; a stale count inside a tool description is
+# the string an agent actually reads, and one was hiding there.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Hermetic — no network, so a canon outage can never make the guard's own
+      # must-fail controls unverifiable.
+      - name: Guard self-test (must-fail controls)
+        run: python3 scripts/check-canon-numbers.py --self-test
+
+      - name: Coverage numbers match live DC Hub canon
+        run: python3 scripts/check-canon-numbers.py
