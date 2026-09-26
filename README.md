@@ -15,7 +15,7 @@ data-center, power & grid intelligence layer for AI agents.
 ## What it does
 
 DC Hub gives Claude live, cited ground truth on the physical infrastructure
-behind AI: 24,600+ data-center facilities across 170+ countries, 300+ power
+behind AI: 24,800+ data-center facilities across 170+ countries, 300+ power
 markets (the DCPI power index with BUILD/CAUTION/AVOID verdicts), real-time ISO
 grid telemetry and interconnection-queue depth, natural gas, fiber routes, water
 risk, tax incentives, and 1,600+ tracked M&A deals.

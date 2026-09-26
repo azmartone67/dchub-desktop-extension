@@ -52,8 +52,8 @@ CANON_URL = "https://dchub.cloud/api/v1/canon/phrases"
 
 # Last-known-good, with the date it was read. Only used when canon is
 # unreachable, and never silently — see _canon().
-PINNED = {"facilities": 24600, "markets": 300, "deals": 1600, "tools": 92}
-PINNED_AT = "2026-09-25"
+PINNED = {"facilities": 24800, "markets": 300, "deals": 1600, "tools": 92}
+PINNED_AT = "2026-09-26"
 
 # (unit, pattern). Each pattern captures the number and is anchored on the NOUN,
 # so "13 guided prompts" and "a curated 14-tool manifest" are not counts we own.
