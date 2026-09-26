@@ -1,0 +1,10 @@
+# Repo-root tooling and docs that the installed extension never reads. Keeps the
+# bundle to what Claude Desktop runs: manifest, icon, server/, node_modules/,
+# package.json, LICENSE. (mcpb's built-in defaults already drop .git,
+# package-lock.json, *.mcpb and the like.)
+# Leading "/" anchors each entry to the repo root; unanchored, README.md and
+# scripts/ would also strip files inside node_modules/ packages.
+/.github/
+/scripts/
+/glama.json
+/README.md
