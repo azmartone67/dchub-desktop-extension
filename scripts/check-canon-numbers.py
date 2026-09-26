@@ -22,9 +22,18 @@ answer. It is the same defect it exists to prevent, one level up.
 
 So this reads canon instead of restating it:
 `https://dchub.cloud/api/v1/canon/phrases` — the same source the site's own
-surfaces resolve from. Every count-shaped phrase in the prose must EQUAL the
-live value for its unit. Numbers nobody anticipated are caught the same as the
+surfaces resolve from. Numbers nobody anticipated are caught the same as the
 ones we already know about.
+
+★ THE RULE (owner decision, 2026-09-26). A published "+" number is a FLOOR, P,
+compared with the live canon value C for its unit:
+    P > C                        FAIL  — an overclaim is the real defect
+    C*(1-FLOOR_TOLERANCE) <= P < C  PASS with a ::warning:: nudge to refresh
+    P == C                       PASS
+    P < C*(1-FLOOR_TOLERANCE)    FAIL  — too stale
+Tools carry no "+" and stay an EXACT match; so does any count published without
+a "+". Exact equality on floors made main red the day canon moved 24,600 ->
+24,800 while the prose still said a true "24,600+".
 
 Network policy: canon unreachable is UNMEASURED, not pass. The check falls back
 to a dated pin and says so loudly, so a CI run that could not reach canon never
@@ -54,6 +63,12 @@ CANON_URL = "https://dchub.cloud/api/v1/canon/phrases"
 # unreachable, and never silently — see _canon().
 PINNED = {"facilities": 24800, "markets": 300, "deals": 1600, "tools": 92}
 PINNED_AT = "2026-09-26"
+
+# How far below canon a published "+" floor may sit before it is too stale.
+FLOOR_TOLERANCE = 0.05
+
+# Units whose published counts are always exact, "+" or not.
+EXACT_UNITS = {"tools"}
 
 # (unit, pattern). Each pattern captures the number and is anchored on the NOUN,
 # so "13 guided prompts" and "a curated 14-tool manifest" are not counts we own.
@@ -94,24 +109,44 @@ def _canon() -> tuple[dict, str]:
         return dict(PINNED), "pinned"
 
 
-def find_counts(prose: str) -> list[tuple[str, str, int]]:
-    """[(unit, matched_text, value)] for every count-shaped phrase found."""
+def find_counts(prose: str) -> list[tuple[str, str, int, bool]]:
+    """[(unit, matched_text, value, is_floor)] for every count-shaped phrase.
+
+    is_floor is True when the number is published with a "+" directly after it.
+    """
     out = []
     for unit, pat in PATTERNS:
         for m in re.finditer(pat, prose, re.I):
             raw = m.group(1).replace(",", "")
             if raw.isdigit():
-                out.append((unit, m.group(0).strip(), int(raw)))
+                is_floor = prose[m.end(1):m.end(1) + 1] == "+"
+                out.append((unit, m.group(0).strip(), int(raw), is_floor))
     return out
 
 
-def lint(prose: str, canon: dict) -> list[str]:
-    bad = []
-    for unit, text, value in find_counts(prose):
+def check(prose: str, canon: dict) -> tuple[list[str], list[str]]:
+    """(failures, warnings) under the floor rule in the module docstring."""
+    bad, warn = [], []
+    for unit, text, value, is_floor in find_counts(prose):
         want = canon.get(unit)
-        if want is not None and value != want:
-            bad.append(f"{unit}: {text!r} — canon is {want:,}")
-    return bad
+        if want is None:
+            continue
+        if unit in EXACT_UNITS or not is_floor:
+            if value != want:
+                bad.append(f"{unit}: {text!r} — canon is {want:,} (exact match required)")
+        elif value > want:
+            bad.append(f"{unit}: {text!r} — OVERCLAIM, canon is {want:,}+")
+        elif value < want * (1 - FLOOR_TOLERANCE):
+            bad.append(f"{unit}: {text!r} — too stale, more than "
+                       f"{FLOOR_TOLERANCE:.0%} below canon {want:,}+")
+        elif value < want:
+            warn.append(f"{unit}: {text!r} — below canon {want:,}+ but within "
+                        f"{FLOOR_TOLERANCE:.0%}; refresh it")
+    return bad, warn
+
+
+def lint(prose: str, canon: dict) -> list[str]:
+    return check(prose, canon)[0]
 
 
 def _prose() -> str:
@@ -165,9 +200,29 @@ def _self_test() -> int:
     ok(any("tools" in v for v in lint("- **Tools:** 53 — query *and* cite", canon)),
        "a label-first 'Tools: N' bullet is checked too")
 
+    # Was "2,000+" against canon 2,100 — now inside FLOOR_TOLERANCE, so the
+    # extraction is asserted with an overclaim instead.
     ok(any("deals" in v for v in lint(
-        "Search 2,000+ tracked data-center M&A transactions.", canon)),
+        "Search 2,500+ tracked data-center M&A transactions.", canon)),
        "a 'data-center' qualifier before M&A does not hide the deal count")
+
+    # ── Floor rule (owner decision 2026-09-26, FLOOR_TOLERANCE) ──
+    bad_, warn_ = check(good.replace("20,500+", "19,500+"), canon)  # -4.9%
+    ok(bad_ == [] and any("facilities" in w for w in warn_),
+       "CONTROL: a floor inside tolerance passes, with a warning")
+    bad_, warn_ = check(good.replace("20,500+", "19,400+"), canon)  # -5.4%
+    ok(any("facilities" in v and "stale" in v for v in bad_),
+       "a floor more than 5% below canon fails")
+    ok(any("OVERCLAIM" in v for v in lint(good.replace("20,500+", "20,501+"), canon)),
+       "a floor ONE above canon fails (overclaim has no tolerance)")
+    ok(check(good, canon)[1] == [], "a floor equal to canon passes with no warning")
+    ok(any("tools" in v for v in lint(good.replace("83 tools", "82 tools"), canon)),
+       "tools stay EXACT: one below canon fails")
+    ok(any("tools" in v for v in lint(good.replace("83 tools", "82+ tools"), canon)),
+       "tools stay EXACT even when published with '+' (no floor tolerance)")
+    ok(any("facilities" in v for v in lint(
+        good.replace("20,500+ data", "20,000 data"), canon)),
+       "a count published WITHOUT '+' stays exact")
 
     ok(lint("13 guided prompts and a curated 14-tool manifest", canon) == [],
        "prompt counts and the curated tool subset are not coverage claims")
@@ -186,7 +241,9 @@ def main() -> int:
     prose = _prose()
     canon, provenance = _canon()
     found = find_counts(prose)
-    bad = lint(prose, canon)
+    bad, warn = check(prose, canon)
+    for w in sorted(set(warn)):
+        print(f"::warning::{w}")
     if bad:
         print("::error::Coverage numbers disagree with DC Hub canon "
               f"({provenance}: {canon}):")
@@ -194,7 +251,8 @@ def main() -> int:
             print(f"  x {b}")
         print("\nRead the live values: " + CANON_URL)
         return 1
-    print(f"OK — {len(found)} coverage number(s) match canon ({provenance}): "
+    print(f"OK — {len(found)} coverage number(s) within canon rule "
+          f"(floor tolerance {FLOOR_TOLERANCE:.0%}, {provenance}): "
           + ", ".join(f"{u}={canon[u]:,}" for u in sorted(canon)))
     return 0
 
