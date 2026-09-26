@@ -60,7 +60,9 @@ PINNED_AT = "2026-09-25"
 PATTERNS: list[tuple[str, str]] = [
     ("facilities", r"([\d,]+)\+?\s*(?:global\s+)?data.?cent(?:er|re)\s+facilit\w*"),
     ("markets", r"([\d,]+)\+?\s*(?:US\s+|global\s+|power\s+)*markets\b"),
-    ("deals", r"([\d,]+)\+?\s*(?:tracked\s+)?(?:M&A\s+)?(?:transactions|deals)\b"),
+    # "2,000+ tracked data-center M&A transactions" sat in a tool description,
+    # green, because "data-center" between "tracked" and "M&A" broke the match.
+    ("deals", r"([\d,]+)\+?\s*(?:tracked\s+)?(?:data.?cent(?:er|re)\s+)?(?:M&A\s+)?(?:transactions|deals)\b"),
     # The qualifier list is deliberate: "83 DC Hub tools" slipped past an
     # MCP-only version of this pattern and shipped a retired 73 in the manifest.
     ("tools", r"\b([\d,]+)\+?\s*(?:MCP\s+|DC\s+Hub\s+|live\s+)?tools\b"),
@@ -162,6 +164,10 @@ def _self_test() -> int:
 
     ok(any("tools" in v for v in lint("- **Tools:** 53 — query *and* cite", canon)),
        "a label-first 'Tools: N' bullet is checked too")
+
+    ok(any("deals" in v for v in lint(
+        "Search 2,000+ tracked data-center M&A transactions.", canon)),
+       "a 'data-center' qualifier before M&A does not hide the deal count")
 
     ok(lint("13 guided prompts and a curated 14-tool manifest", canon) == [],
        "prompt counts and the curated tool subset are not coverage claims")
