@@ -52,8 +52,8 @@ CANON_URL = "https://dchub.cloud/api/v1/canon/phrases"
 
 # Last-known-good, with the date it was read. Only used when canon is
 # unreachable, and never silently — see _canon().
-PINNED = {"facilities": 20500, "markets": 300, "deals": 2100, "tools": 83}
-PINNED_AT = "2026-09-05"
+PINNED = {"facilities": 24600, "markets": 300, "deals": 1600, "tools": 92}
+PINNED_AT = "2026-09-25"
 
 # (unit, pattern). Each pattern captures the number and is anchored on the NOUN,
 # so "13 guided prompts" and "a curated 14-tool manifest" are not counts we own.
@@ -64,6 +64,10 @@ PATTERNS: list[tuple[str, str]] = [
     # The qualifier list is deliberate: "83 DC Hub tools" slipped past an
     # MCP-only version of this pattern and shipped a retired 73 in the manifest.
     ("tools", r"\b([\d,]+)\+?\s*(?:MCP\s+|DC\s+Hub\s+|live\s+)?tools\b"),
+    # The README's "- **Tools:** 53" bullet (label before number) sat at 53
+    # while the prose above was fixed, because every pattern here is
+    # number-then-noun.
+    ("tools", r"\bTools:\**\s*([\d,]+)"),
 ]
 
 
@@ -155,6 +159,9 @@ def _self_test() -> int:
 
     ok(any("tools" in v for v in lint("bridges to all 73 DC Hub tools", canon)),
        "a qualifier between the number and 'tools' does not hide the count")
+
+    ok(any("tools" in v for v in lint("- **Tools:** 53 — query *and* cite", canon)),
+       "a label-first 'Tools: N' bullet is checked too")
 
     ok(lint("13 guided prompts and a curated 14-tool manifest", canon) == [],
        "prompt counts and the curated tool subset are not coverage claims")
