@@ -21,6 +21,29 @@ markets (the DCPI power index with BUILD/CAUTION/AVOID verdicts), real-time ISO
 grid telemetry and interconnection-queue depth, natural gas, fiber routes, water
 risk, tax incentives, and 1,600+ tracked M&A deals.
 
+## Capacity Source
+
+The extension bridges to the full `https://dchub.cloud/mcp` endpoint, so it
+carries the whole **Capacity Source** flow: data-center capacity to buy or
+lease (powered land, powered shells, turnkey capacity and colocation), listed
+free by operators and brokers at <https://dchub.cloud/listings>.
+
+- **`source_capacity`** searches the listings by size (`min_kw` in kW or
+  `min_mw` in MW) and location (a region such as North America or Europe, a
+  country, a US state or a metro). Listing cards work with no signup; pass a
+  listing's `slug` to open it.
+- **`accept_capacity_terms`** records your acceptance of DC Hub's introduction
+  terms (<https://dchub.cloud/listings#terms>) the first time you open a
+  listing. Claude should call it only after you have agreed to them.
+- **`request_capacity_intro`** registers a deal on a listing. DC Hub sends the
+  provider only your company name and requirement; contacts are shared only if
+  the provider accepts, and nothing is shared on a decline.
+- **`/dchub:find_capacity`** is the ready-made prompt that runs the whole flow
+  from a plain-language requirement (for example "powered shell in Dallas,
+  energized next year"): search, explain which listings fit, then register.
+
+To list capacity, use <https://dchub.cloud/listings#list-capacity> (listing is free).
+
 ## How it works
 
 The extension bundles [`mcp-remote`](https://www.npmjs.com/package/mcp-remote),
