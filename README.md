@@ -6,7 +6,7 @@ A Claude Desktop extension (MCPB) that connects Claude to **DC Hub** — the liv
 data-center, power & grid intelligence layer for AI agents.
 
 - **MCP server:** `https://dchub.cloud/mcp` (Streamable HTTP)
-- **Tools:** 92 — query *and* cite (data is CC-BY-4.0)
+- **Tools:** 94 (query *and* cite; data is CC-BY-4.0)
 - **Auth:** free tier works with no signup; optional OAuth 2.0 (WorkOS AuthKit,
   Dynamic Client Registration + PKCE) unlocks the full data tier
 - **Privacy:** https://dchub.cloud/privacy · **Terms:** https://dchub.cloud/terms
@@ -19,7 +19,7 @@ behind AI: a global data-center facility map across 170+ countries
 (corroborated count pending), 300+ power
 markets (the DCPI power index with BUILD/CAUTION/AVOID verdicts), real-time ISO
 grid telemetry and interconnection-queue depth, natural gas, fiber routes, water
-risk, tax incentives, and 1,600+ tracked M&A deals.
+risk, tax incentives, and 1,700+ tracked M&A deals.
 
 ## Capacity Source
 
