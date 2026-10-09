@@ -72,7 +72,9 @@ WITHHELD = "withheld"
 
 
 def _canon_value(v):
-    raw = str(v).replace(",", "").rstrip("+").strip()
+    # strip() BEFORE rstrip("+"): "1,700+ " (trailing space) must read 1700,
+    # not fall through to WITHHELD.
+    raw = str(v).replace(",", "").strip().rstrip("+").strip()
     return int(raw) if raw.isdigit() else WITHHELD
 
 # How far below canon a published "+" floor may sit before it is too stale.
@@ -241,6 +243,19 @@ def _self_test() -> int:
 
     ok(lint("13 guided prompts and a curated 14-tool manifest", canon) == [],
        "prompt counts and the curated tool subset are not coverage claims")
+
+    # ── Withheld counts (canon publishes a phrase, not a number) ──
+    ok(_canon_value("corroborated count pending") == WITHHELD,
+       "a non-numeric canon value reads as WITHHELD")
+    ok(_canon_value("1,700+ ") == 1700 and _canon_value("300+") == 300
+       and _canon_value(94) == 94,
+       "numeric canon values parse (incl. a trailing space after '+')")
+    held = {**canon, "facilities": WITHHELD}
+    ok(any("facilities" in v and "WITHHOLDS" in v for v in lint(good, held)),
+       "a published facility number fails when canon WITHHOLDS the count")
+    ok(lint("Global facility map (corroborated count pending), 300+ power "
+            "markets, 2,100+ tracked M&A deals. 83 tools.", held) == [],
+       "CONTROL: the withheld phrase with no number is clean")
 
     # A pattern that matches nothing passes vacuously — assert we can SEE.
     ok(len(find_counts(good)) == 4,

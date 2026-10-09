@@ -8,3 +8,8 @@
 /scripts/
 /glama.json
 /README.md
+
+# Python bytecode from running scripts/ locally. scripts/ is already excluded
+# above; these keep a stray __pycache__ anywhere else out of the bundle.
+__pycache__/
+*.pyc
