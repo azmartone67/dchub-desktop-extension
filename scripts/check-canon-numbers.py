@@ -61,8 +61,19 @@ CANON_URL = "https://dchub.cloud/api/v1/canon/phrases"
 
 # Last-known-good, with the date it was read. Only used when canon is
 # unreachable, and never silently — see _canon().
-PINNED = {"facilities": 24800, "markets": 300, "deals": 1600, "tools": 92}
-PINNED_AT = "2026-09-26"
+PINNED = {"facilities": "withheld", "markets": 300, "deals": 1700, "tools": 94}
+PINNED_AT = "2026-10-09"
+
+# Canon publishes a non-numeric value (e.g. facilities = "corroborated count
+# pending", frozen by the owner since 2026-09-29) when a count is WITHHELD.
+# Any published number for a withheld unit is drift. Before this, int() raised
+# on the string and the whole run fell back to the stale pin.
+WITHHELD = "withheld"
+
+
+def _canon_value(v):
+    raw = str(v).replace(",", "").rstrip("+").strip()
+    return int(raw) if raw.isdigit() else WITHHELD
 
 # How far below canon a published "+" floor may sit before it is too stale.
 FLOOR_TOLERANCE = 0.05
@@ -95,7 +106,7 @@ def _canon() -> tuple[dict, str]:
             CANON_URL, headers={"User-Agent": "dchub-desktop-extension-ci/1.0"})
         with urllib.request.urlopen(req, timeout=10) as r:
             d = json.load(r)
-        got = {k: int(str(d[k]).replace(",", "").rstrip("+"))
+        got = {k: _canon_value(d[k])
                for k in ("facilities", "markets", "deals", "tools") if k in d}
         if len(got) == 4:
             return got, "live"
@@ -130,6 +141,10 @@ def check(prose: str, canon: dict) -> tuple[list[str], list[str]]:
     for unit, text, value, is_floor in find_counts(prose):
         want = canon.get(unit)
         if want is None:
+            continue
+        if want == WITHHELD:
+            bad.append(f"{unit}: {text!r}: canon WITHHOLDS this count; "
+                       f"publish no number")
             continue
         if unit in EXACT_UNITS or not is_floor:
             if value != want:
@@ -253,7 +268,8 @@ def main() -> int:
         return 1
     print(f"OK — {len(found)} coverage number(s) within canon rule "
           f"(floor tolerance {FLOOR_TOLERANCE:.0%}, {provenance}): "
-          + ", ".join(f"{u}={canon[u]:,}" for u in sorted(canon)))
+          + ", ".join(f"{u}={canon[u]:,}" if isinstance(canon[u], int)
+                     else f"{u}={canon[u]}" for u in sorted(canon)))
     return 0
 
 
