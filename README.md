@@ -6,20 +6,20 @@ A Claude Desktop extension (MCPB) that connects Claude to **DC Hub** — the liv
 data-center, power & grid intelligence layer for AI agents.
 
 - **MCP server:** `https://dchub.cloud/mcp` (Streamable HTTP)
-- **Tools:** 94 (query *and* cite; data is CC-BY-4.0)
-- **Auth:** free tier works with no signup; optional OAuth 2.0 (WorkOS AuthKit,
-  Dynamic Client Registration + PKCE) unlocks the full data tier
+- **Tools:** the full DC Hub tool set; start with `execute_plan`, which chains the
+  right tools into one dated, cited answer
+- **Auth:** no signup needed to start; `DCHUB_API_KEY` is optional, and OAuth 2.0
+  sign-in (WorkOS AuthKit, Dynamic Client Registration + PKCE) is also supported
 - **Privacy:** https://dchub.cloud/privacy · **Terms:** https://dchub.cloud/terms
 - **Docs / full tool list:** https://dchub.cloud/llms.txt
 
 ## What it does
 
 DC Hub gives Claude live, cited ground truth on the physical infrastructure
-behind AI: a global data-center facility map across 170+ countries
-(corroborated count pending), 300+ power
-markets (the DCPI power index with BUILD/CAUTION/AVOID verdicts), real-time ISO
+behind AI: a global data-center facility map, power markets scored daily by the
+Data Center Power Index (DCPI, with BUILD/CAUTION/AVOID verdicts), real-time ISO
 grid telemetry and interconnection-queue depth, natural gas, fiber routes, water
-risk, tax incentives, and 1,700+ tracked M&A deals.
+risk, tax incentives, and tracked data-center M&A deals.
 
 ## Capacity Source
 
@@ -71,6 +71,7 @@ npx @anthropic-ai/mcpb pack . dchub.mcpb
 
 ## License
 
-MIT — see [LICENSE](./LICENSE). Underlying DC Hub data is licensed CC-BY-4.0.
+MIT — see [LICENSE](./LICENSE). The licence terms of each DC Hub data layer are
+listed at https://dchub.cloud/llms.txt.
 
 Maintained by DC Hub · https://dchub.cloud · jonathan@dchub.cloud
